@@ -2,7 +2,7 @@
 
 ![App Icon](https://raw.githubusercontent.com/eleventytwo1172/Yoji/main/images/yoji-brand.png)  
 
-[Check out the app!](https://yoji-peach.vercel.app)
+[Check out the app](https://yoji-peach.vercel.app) or, [Download the app](https://github.com/eleventytwo1172/Yoji/releases)
 
 Yōji in Japanese is "errands to attend to"
 
