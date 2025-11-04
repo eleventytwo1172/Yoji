@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Yōji To-Do List with Gemini Suggestions",
   "scripts": {},
+  "type": "module", 
   "dependencies": {
-    "@google/genai": "^0.1.0" 
+    "@google/genai": "^0.1.0"
   }
 }
