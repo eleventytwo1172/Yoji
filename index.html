@@ -261,16 +261,35 @@
              * Calls the Gemini API with exponential backoff.
              */
             async function callGeminiApi(payload, retries = 3, delay = 1000) {
-                const apiKey = "AIzaSyBgeji-qK4NXE-ASBRLwGtcB99e5Bz4L9g"; // API key is handled by the environment
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const apiUrl = '/api/suggest'; // Call your Vercel serverless function
 
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
 
+        if (!response.ok) {
+            if (response.status === 429 && retries > 0) {
+                // Throttled, retry with exponential backoff
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return callGeminiApi(payload, retries - 1, delay * 2);
+            }
+            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        if (retries > 0) {
+            // Network error, retry with backoff
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return callGeminiApi(payload, retries - 1, delay * 2);
+        }
+        console.error("Failed to call Gemini API:", error);
+        throw error; // Rethrow after all retries failed
+    }
+}
                     if (!response.ok) {
                         if (response.status === 429 && retries > 0) {
                             // Throttled, retry with backoff
@@ -353,3 +372,4 @@
 </body>
 
 </html>
+
