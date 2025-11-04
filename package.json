@@ -1,6 +1,9 @@
 {
+  "name": "yoji-ai-todo",
+  "version": "1.0.0",
+  "description": "Yōji To-Do List with Gemini Suggestions",
+  "scripts": {},
   "dependencies": {
-    "@google/genai": "^0.1.0"
+    "@google/genai": "^0.1.0" 
   }
 }
-5.  **Redeploy to Vercel.**
