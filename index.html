@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yōji - To-Do List</title>
+    <!-- Loads Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- This is the little icon in the browser tab (favicon). -->
+    <link rel="icon" href="https://raw.githubusercontent.com/eleventytwo1172/Yoji/main/images/yoji-png.png">
+    
+    <script>
+        // Configures Tailwind CSS to use the "Inter" font family
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* A little extra style for a smoother experience */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Simple spin animation for the loading icon */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <!-- Main App Container -->
+    <div class="container mx-auto max-w-lg mt-12 px-4">
+        
+        <!-- Card -->
+        <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8">
+
+            <!-- Header Section -->
+            <div class="flex items-center mb-6">
+                
+                <!-- App icon now points to your GitHub link -->
+                <img id="app-icon" 
+                     src="https://raw.githubusercontent.com/eleventytwo1172/Yoji/main/images/yoji-png.png" 
+                     alt="Yōji App Icon" 
+                     class="w-16 h-16 rounded-lg mr-4">
+                
+                <h1 class="text-3xl font-bold text-gray-800">Yōji</h1>
+            </div>
+
+            <!-- Input Form -->
+            <form id="task-form" class="flex mb-6">
+                <input type="text" 
+                       id="task-input" 
+                       placeholder="Add a task or get a suggestion..."
+                       aria-label="New task"
+                       class="flex-grow border border-gray-300 rounded-l-lg p-3 text-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                       autocomplete="off">
+                <button type="submit"
+                        id="add-button"
+                        class="bg-cyan-600 text-white p-3 px-5 font-semibold text-lg hover:bg-cyan-700 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2">
+                    Add
+                </button>
+                <button type="button"
+                        id="suggest-button"
+                        class="bg-purple-600 text-white p-3 px-4 rounded-r-lg font-semibold text-lg hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center justify-center w-16">
+                    <!-- Magic Wand Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L12.414 6.5H14a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L16.414 9.5H18a1 1 0 011 1v.01a1 1 0 01-1 1h-1.586l1.707 1.707a1 1 0 01-1.414 1.414L15.01 12.4H15a1 1 0 01-1 1v1.586l1.707 1.707a1 1 0 01-1.414 1.414L12.5 16.414V18a1 1 0 01-1 1h-1.01a1 1 0 01-1-1v-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L7.59 15.01H7a1 1 0 01-1-1v-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L5.586 10.5H4a1 1 0 01-1-1V9a1 1 0 011-1h1.586L3.879 6.293a1 1 0 011.414-1.414L7 6.586V5a1 1 0 011-1h1.01a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L10.414 8.5H12a1 1 0 011 1V10a1 1 0 01-1 1h-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L9 11.586V10a1 1 0 01-1-1V8.01a1 1 0 011-1V5.586L7.293 3.879a1 1 0 01-1.414-1.414L7.586 4.18V3a1 1 0 011-1h1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Gemini Status -->
+            <div id="gemini-status" class="text-gray-500 text-sm mb-4 text-center" style="display: none;"></div>
+
+            <!-- Task List -->
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Your Tasks</h2>
+            <ul id="task-list" class="space-y-3">
+                <!-- Tasks will be dynamically added here by JavaScript. -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const taskForm = document.getElementById('task-form');
+            const taskInput = document.getElementById('task-input');
+            const taskList = document.getElementById('task-list');
+            const suggestButton = document.getElementById('suggest-button');
+            const addButton = document.getElementById('add-button');
+            const geminiStatus = document.getElementById('gemini-status');
+
+            // Key for storing tasks in localStorage
+            const TASKS_STORAGE_KEY = 'yoji_tasks';
+
+            // Load tasks from localStorage when the app starts
+            let tasks = loadTasks();
+
+            // Function to load tasks from localStorage
+            function loadTasks() {
+                const tasksString = localStorage.getItem(TASKS_STORAGE_KEY);
+                if (tasksString) {
+                    return JSON.parse(tasksString);
+                } else {
+                    return [];
+                }
+            }
+
+            // Function to save tasks to localStorage
+            function saveTasks() {
+                localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
+            }
+
+            // Function to render all tasks to the UI
+            function renderTasks() {
+                // Clear the existing list
+                taskList.innerHTML = '';
+
+                // If no tasks, show a message
+                if (tasks.length === 0) {
+                    taskList.innerHTML = '<li class="text-gray-500 text-center p-4">Your list is empty!</li>';
+                    return;
+                }
+
+                // Create and append each task item
+                tasks.forEach((task, index) => {
+                    const taskElement = createTaskElement(task, index);
+                    taskList.appendChild(taskElement);
+                });
+            }
+
+            // Function to create the HTML element for a single task
+            function createTaskElement(task, index) {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm';
+                li.dataset.index = index; // Store the index
+
+                const taskTextClasses = task.completed 
+                    ? 'line-through text-gray-500' 
+                    : 'text-gray-800';
+
+                li.innerHTML = `
+                    <div class="flex items-center flex-grow overflow-hidden mr-4">
+                        <input type="checkbox" 
+                               class="task-checkbox h-5 w-5 text-cyan-600 rounded border-gray-300 focus:ring-cyan-500" 
+                               ${task.completed ? 'checked' : ''}>
+                        <span class="task-text ml-3 text-lg ${taskTextClasses} break-words">
+                            ${escapeHTML(task.text)}
+                        </span>
+                    </div>
+                    <button class="delete-button text-gray-400 hover:text-red-500 transition-colors flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                `;
+
+                // Add event listeners for checkbox and delete button
+                const checkbox = li.querySelector('.task-checkbox');
+                const deleteButton = li.querySelector('.delete-button');
+
+                checkbox.addEventListener('change', () => {
+                    toggleTask(index);
+                });
+
+                deleteButton.addEventListener('click', () => {
+                    deleteTask(index);
+                });
+
+                return li;
+            }
+            
+            // Function to handle adding a new task
+            function addTask(e) {
+                e.preventDefault(); // Prevent form from submitting
+                const text = taskInput.value.trim();
+
+                if (text === '') {
+                    return; // Don't add empty tasks
+                }
+
+                tasks.push({ text: text, completed: false });
+                taskInput.value = ''; // Clear the input
+
+                saveTasks();
+                renderTasks();
+            }
+
+            // Function to toggle the completed state of a task
+            function toggleTask(index) {
+                if (tasks[index]) {
+                    tasks[index].completed = !tasks[index].completed;
+                    saveTasks();
+                    renderTasks(); // Re-render to update styles
+                }
+            }
+
+            // Function to delete a task
+            function deleteTask(index) {
+                if (tasks[index]) {
+                    tasks.splice(index, 1); // Remove task from array
+                    saveTasks();
+                    renderTasks();
+                }
+            }
+
+            // Helper function to escape HTML to prevent XSS
+            function escapeHTML(str) {
+                return str.replace(/[&<>"']/g, function(match) {
+                    return {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;'
+                    }[match];
+                });
+            }
+
+            // --- Gemini API Functions ---
+
+            // Function to show loading/error messages
+            function showStatus(message, isLoading = false) {
+                geminiStatus.textContent = message;
+                geminiStatus.style.display = message ? 'block' : 'none';
+                
+                // Disable buttons while loading
+                suggestButton.disabled = isLoading;
+                addButton.disabled = isLoading;
+                taskInput.disabled = isLoading;
+
+                if (isLoading) {
+                    suggestButton.innerHTML = `
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    `;
+                } else {
+                    // Restore suggest button icon
+                    suggestButton.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L12.414 6.5H14a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L16.414 9.5H18a1 1 0 011 1v.01a1 1 0 01-1 1h-1.586l1.707 1.707a1 1 0 01-1.414 1.414L15.01 12.4H15a1 1 0 01-1 1v1.586l1.707 1.707a1 1 0 01-1.414 1.414L12.5 16.414V18a1 1 0 01-1 1h-1.01a1 1 0 01-1-1v-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L7.59 15.01H7a1 1 0 01-1-1v-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L5.586 10.5H4a1 1 0 01-1-1V9a1 1 0 011-1h1.586L3.879 6.293a1 1 0 011.414-1.414L7 6.586V5a1 1 0 011-1h1.01a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L10.414 8.5H12a1 1 0 011 1V10a1 1 0 01-1 1h-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L9 11.586V10a1 1 0 01-1-1V8.01a1 1 0 011-1V5.586L7.293 3.879a1 1 0 01-1.414-1.414L7.586 4.18V3a1 1 0 011-1h1.414z" clip-rule="evenodd" />
+                        </svg>
+                    `;
+                }
+            }
+
+            /**
+             * Calls the Gemini API with exponential backoff.
+             */
+            async function callGeminiApi(payload, retries = 3, delay = 1000) {
+                const apiKey = ""; // API key is handled by the environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 429 && retries > 0) {
+                            // Throttled, retry with backoff
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            return callGeminiApi(payload, retries - 1, delay * 2);
+                        }
+                        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                    }
+
+                    return await response.json();
+
+                } catch (error) {
+                    if (retries > 0) {
+                        // Network error, retry with backoff
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return callGeminiApi(payload, retries - 1, delay * 2);
+                    }
+                    console.error("Failed to call Gemini API:", error);
+                    throw error; // Rethrow after all retries failed
+                }
+            }
+
+
+            // Function to get a task suggestion from Gemini
+            async function getTaskSuggestion() {
+                showStatus('✨ Getting suggestion...', true);
+
+                const existingTasks = tasks.map(t => t.text).join(', ') || 'none';
+                
+                const systemPrompt = "You are a helpful assistant. Your only job is to suggest a single, short, common to-do list item. Make it a simple action. Examples: 'Buy milk', 'Walk the dog', 'Pay electricity bill', 'Call mom'. Do not add any preamble or extra text. Just return the task text.";
+                
+                const userQuery = `My current tasks are: ${existingTasks}. Suggest one new, simple task.`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    },
+                };
+
+                try {
+                    const result = await callGeminiApi(payload);
+                    const candidate = result.candidates?.[0];
+                    
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        let text = candidate.content.parts[0].text;
+                        
+                        // Clean up the text, remove quotes or "Task:" prefixes
+                        text = text.trim().replace(/^["']/, '').replace(/["']$/, '').replace(/^Task:/, '').trim();
+
+                        taskInput.value = text; // Put suggestion in the input box
+                        taskInput.focus(); // Focus the input
+                        showStatus(''); // Clear status
+                    } else {
+                        throw new Error('Invalid response structure from API.');
+                    }
+                } catch (error) {
+                    console.error('Error getting task suggestion:', error);
+                    showStatus('Sorry, could not get a suggestion. Please try again.', false);
+                } finally {
+                    // Always re-enable buttons and clear loading state
+                    showStatus('', false); 
+                }
+            }
+
+
+            // --- Initialize the App ---
+
+            // Add listener for the form submission
+            taskForm.addEventListener('submit', addTask);
+
+            // Add listener for the suggest button
+            suggestButton.addEventListener('click', getTaskSuggestion);
+
+            // Initial render of tasks on page load
+            renderTasks();
+        });
+    </script>
+
+</body>
+</html>
