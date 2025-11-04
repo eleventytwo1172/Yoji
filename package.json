@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@google/genai": "^0.1.0"
+  }
+}
+5.  **Redeploy to Vercel.**
