@@ -49,7 +49,7 @@
             <!-- Header Section -->
             <div class="flex items-center mb-6">
                 
-                <!-- App icon now points to your GitHub link -->
+                <!-- App icon -->
                 <img id="app-icon" 
                      src="https://raw.githubusercontent.com/eleventytwo1172/Yoji/main/images/yoji-png.png" 
                      alt="Yōji App Icon" 
@@ -76,7 +76,7 @@
                         class="bg-purple-600 text-white p-3 px-4 rounded-r-lg font-semibold text-lg hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center justify-center w-16">
                     <!-- Magic Wand Icon -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L12.414 6.5H14a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L16.414 9.5H18a1 1 0 011 1v.01a1 1 0 01-1 1h-1.586l1.707 1.707a1 1 0 01-1.414 1.414L15.01 12.4H15a1 1 0 01-1 1v1.586l1.707 1.707a1 1 0 01-1.414 1.414L12.5 16.414V18a1 1 0 01-1 1h-1.01a1 1 0 01-1-1v-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L7.59 15.01H7a1 1 0 01-1-1v-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L5.586 10.5H4a1 1 0 01-1-1V9a1 1 0 011-1h1.586L3.879 6.293a1 1 0 011.414-1.414L7 6.586V5a1 1 0 011-1h1.01a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L10.414 8.5H12a1 1 0 011 1V10a1 1 0 01-1 1h-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L9 11.586V10a1 1 0 01-1-1V8.01a1 1 0 011-1V5.586L7.293 3.879a1 1 0 01-1.414-1.414L7.586 4.18V3a1 1 0 011-1h1.414z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L12.414 6.5H14a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L16.414 9.5H18a1 1 0 011 1v.01a1 1 0 01-1 1h-1.586l1.707 1.707a1 1 0 01-1.414 1.414L15.01 12.4H15a1 1 0 01-1 1v1.586l1.707 1.707a1 1 0 01-1.414 1.414L12.5 16.414V18a1 1 0 01-1 1h-1.01a1 1 0 01-1-1v-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L7.59 15.01H7a1 1 0 01-1-1v-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L5.586 10.5H4a1 1 0 01-1-1V9a1 1 0 011-1h1.586L3.879 6.293a1 1 0 011.414-1.414L7 6.586V5a1 1 0 011-1h1.01a1 1 0 011 1v1.586l1.707-1.707a1 1 0 011.414 1.414L10.414 8.5H12a1 1 0 011 1V10a1 1 0 01-1 1h-1.586l-1.707 1.707a1 1 0 01-1.414-1.414L9 11.586V10a1 1 0 01-1-1V8.01a1 1 0 011-1V5.586L7.293 3.879a1 1 0 01-1.414-1.414L7.586 4.18V3a1 1 0 011-2h1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
             </form>
@@ -107,7 +107,8 @@
             // Load tasks from localStorage when the app starts
             let tasks = loadTasks();
 
-            // Function to load tasks from localStorage
+            // --- LOCAL STORAGE FUNCTIONS (No Change) ---
+
             function loadTasks() {
                 const tasksString = localStorage.getItem(TASKS_STORAGE_KEY);
                 if (tasksString) {
@@ -117,34 +118,28 @@
                 }
             }
 
-            // Function to save tasks to localStorage
             function saveTasks() {
                 localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
             }
 
-            // Function to render all tasks to the UI
-            function renderTasks() {
-                // Clear the existing list
-                taskList.innerHTML = '';
+            // --- UI RENDERING & TASK MUTATION (No Change) ---
 
-                // If no tasks, show a message
+            function renderTasks() {
+                taskList.innerHTML = '';
                 if (tasks.length === 0) {
                     taskList.innerHTML = '<li class="text-gray-500 text-center p-4">Your list is empty!</li>';
                     return;
                 }
-
-                // Create and append each task item
                 tasks.forEach((task, index) => {
                     const taskElement = createTaskElement(task, index);
                     taskList.appendChild(taskElement);
                 });
             }
 
-            // Function to create the HTML element for a single task
             function createTaskElement(task, index) {
                 const li = document.createElement('li');
                 li.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm';
-                li.dataset.index = index; // Store the index
+                li.dataset.index = index; 
 
                 const taskTextClasses = task.completed 
                     ? 'line-through text-gray-500' 
@@ -166,7 +161,6 @@
                     </button>
                 `;
 
-                // Add event listeners for checkbox and delete button
                 const checkbox = li.querySelector('.task-checkbox');
                 const deleteButton = li.querySelector('.delete-button');
 
@@ -181,41 +175,37 @@
                 return li;
             }
             
-            // Function to handle adding a new task
             function addTask(e) {
-                e.preventDefault(); // Prevent form from submitting
+                e.preventDefault(); 
                 const text = taskInput.value.trim();
 
                 if (text === '') {
-                    return; // Don't add empty tasks
+                    return; 
                 }
 
                 tasks.push({ text: text, completed: false });
-                taskInput.value = ''; // Clear the input
+                taskInput.value = ''; 
 
                 saveTasks();
                 renderTasks();
             }
 
-            // Function to toggle the completed state of a task
             function toggleTask(index) {
                 if (tasks[index]) {
                     tasks[index].completed = !tasks[index].completed;
                     saveTasks();
-                    renderTasks(); // Re-render to update styles
+                    renderTasks(); 
                 }
             }
 
-            // Function to delete a task
             function deleteTask(index) {
                 if (tasks[index]) {
-                    tasks.splice(index, 1); // Remove task from array
+                    tasks.splice(index, 1); 
                     saveTasks();
                     renderTasks();
                 }
             }
 
-            // Helper function to escape HTML to prevent XSS
             function escapeHTML(str) {
                 return str.replace(/[&<>"']/g, function(match) {
                     return {
@@ -228,9 +218,8 @@
                 });
             }
 
-            // --- Gemini API Functions ---
+            // --- REWRITTEN AI FUNCTION ---
 
-            // Function to show loading/error messages
             function showStatus(message, isLoading = false) {
                 geminiStatus.textContent = message;
                 geminiStatus.style.display = message ? 'block' : 'none';
@@ -256,99 +245,44 @@
                     `;
                 }
             }
-
-            /**
-             * Calls the Gemini API with exponential backoff.
-             */
-            async function callGeminiApi(payload, retries = 3, delay = 1000) {
-    const apiUrl = '/api/suggest'; // Call your Vercel serverless function
-
-    try {
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            if (response.status === 429 && retries > 0) {
-                // Throttled, retry with exponential backoff
-                await new Promise(resolve => setTimeout(resolve, delay));
-                return callGeminiApi(payload, retries - 1, delay * 2);
-            }
-            throw new Error(`API Error: ${response.status} ${response.statusText}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        if (retries > 0) {
-            // Network error, retry with backoff
-            await new Promise(resolve => setTimeout(resolve, delay));
-            return callGeminiApi(payload, retries - 1, delay * 2);
-        }
-        console.error("Failed to call Gemini API:", error);
-        throw error; // Rethrow after all retries failed
-    }
-}
-                    if (!response.ok) {
-                        if (response.status === 429 && retries > 0) {
-                            // Throttled, retry with backoff
-                            await new Promise(resolve => setTimeout(resolve, delay));
-                            return callGeminiApi(payload, retries - 1, delay * 2);
-                        }
-                        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                    }
-
-                    return await response.json();
-
-                } catch (error) {
-                    if (retries > 0) {
-                        // Network error, retry with backoff
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        return callGeminiApi(payload, retries - 1, delay * 2);
-                    }
-                    console.error("Failed to call Gemini API:", error);
-                    throw error; // Rethrow after all retries failed
-                }
-            }
-
-
-            // Function to get a task suggestion from Gemini
+            
             async function getTaskSuggestion() {
                 showStatus('✨ Getting suggestion...', true);
 
+                // Compile all current tasks into a string to send to the serverless function
                 const existingTasks = tasks.map(t => t.text).join(', ') || 'none';
                 
-                const systemPrompt = "You are a helpful assistant. Your only job is to suggest a single, short, common to-do list item. Make it a simple action. Examples: 'Buy milk', 'Walk the dog', 'Pay electricity bill', 'Call mom'. Do not add any preamble or extra text. Just return the task text.";
-                
-                const userQuery = `My current tasks are: ${existingTasks}. Suggest one new, simple task.`;
-
-                const payload = {
-                    contents: [{ parts: [{ text: userQuery }] }],
-                    systemInstruction: {
-                        parts: [{ text: systemPrompt }]
-                    },
-                };
-
                 try {
-                    const result = await callGeminiApi(payload);
-                    const candidate = result.candidates?.[0];
+                    // Fetch from the local Vercel endpoint, which handles the secure API call
+                    const response = await fetch('/api/suggest', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ existingTasks: existingTasks }) // Send context securely
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ error: 'Unknown server error.' }));
+                        throw new Error(errorData.error || 'Serverless function failed to return a suggestion.');
+                    }
+
+                    const result = await response.json();
                     
-                    if (candidate && candidate.content?.parts?.[0]?.text) {
-                        let text = candidate.content.parts[0].text;
+                    if (result.suggestion) {
+                        let text = result.suggestion;
                         
-                        // Clean up the text, remove quotes or "Task:" prefixes
+                        // Clean up the text (remove quotes/prefixes)
                         text = text.trim().replace(/^["']/, '').replace(/["']$/, '').replace(/^Task:/, '').trim();
 
-                        taskInput.value = text; // Put suggestion in the input box
-                        taskInput.focus(); // Focus the input
-                        showStatus(''); // Clear status
+                        taskInput.value = text; // Insert suggestion into the input box
+                        taskInput.focus(); 
+                        showStatus(''); 
                     } else {
-                        throw new Error('Invalid response structure from API.');
+                        throw new Error('Serverless function returned an empty suggestion.');
                     }
                 } catch (error) {
                     console.error('Error getting task suggestion:', error);
-                    showStatus('Sorry, could not get a suggestion. Please try again.', false);
+                    // Provide a user-friendly message for failure
+                    showStatus('Sorry, the AI suggestion failed. Check your Vercel logs and API key.', false);
                 } finally {
                     // Always re-enable buttons and clear loading state
                     showStatus('', false); 
@@ -370,6 +304,4 @@
     </script>
 
 </body>
-
 </html>
-
